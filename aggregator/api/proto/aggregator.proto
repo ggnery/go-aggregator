@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package aggregator;
 
-option go_package = "proto/aggregator/v1";
+option go_package = "api/proto/aggregator/v1";
 
 // ReportResult - Node reports task completion
 message ReportResultRequest {

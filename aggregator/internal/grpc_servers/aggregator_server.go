@@ -4,7 +4,7 @@ import (
 	"context" // handle request contexts
 	"fmt"
 	"log"
-	aggregatorpb "aggregator/proto/aggregator/v1"
+	aggregatorpb "aggregator/api/proto/aggregator/v1"
 )
 
 type AggregatorServer struct {

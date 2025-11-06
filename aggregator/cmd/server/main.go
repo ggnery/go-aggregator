@@ -4,7 +4,7 @@ import (
 	"log"
 	"net" // network operations
 	"google.golang.org/grpc"
-	"aggregator/controller"
+	"aggregator/internal/grpc_servers"
 )
 
 func main() {

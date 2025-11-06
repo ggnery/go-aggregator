@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.33.0
-// source: proto/aggregator.proto
+// source: api/proto/aggregator.proto
 
 package v1
 
@@ -117,5 +117,5 @@ var Aggregator_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/aggregator.proto",
+	Metadata: "api/proto/aggregator.proto",
 }

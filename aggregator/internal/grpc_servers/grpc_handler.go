@@ -2,7 +2,7 @@ package controller
 
 import (
 	"google.golang.org/grpc"
-	aggregatorpb "aggregator/proto/aggregator/v1"
+	aggregatorpb "aggregator/api/proto/aggregator/v1"
 )
 
 func RegisterGRPCServers(grpcServer *grpc.Server) {

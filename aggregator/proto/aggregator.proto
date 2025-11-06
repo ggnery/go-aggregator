@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package aggregator;
+
+option go_package = "proto/aggregator/v1";
+
+// ReportResult - Node reports task completion
+message ReportResultRequest {
+    string task_id = 1;          // UUID of the task
+    int64 attempt_id = 2;        // Attempt ID from task_attempt table
+    string lease_token = 3;      // Security token proving lease ownership
+    string status = 4;           // "succeeded" or "failed"
+    string result_ref = 5;       // S3 URI: "s3://results/output.txt"
+    string metrics = 6;          // JSON string: {"duration_ms": 8234, "tokens": 156}
+  }
+  
+  message ReportResultResponse {
+    bool acknowledged = 1;       // Always true if accepted
+    string message = 2;          // Optional info
+  }
+  
+
+
+service Aggregator {
+    rpc ReportResult(ReportResultRequest) returns (ReportResultResponse);
+}

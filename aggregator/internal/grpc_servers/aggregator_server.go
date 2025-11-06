@@ -11,7 +11,7 @@ type AggregatorServer struct {
 	aggregatorpb.UnimplementedAggregatorServer
 }
 
-//Report Result Controller
+//Report Result server
 func (s *AggregatorServer) ReportResult(ctx context.Context, req *aggregatorpb.ReportResultRequest) (*aggregatorpb.ReportResultResponse, error) {
 	// Log the incoming request
 	log.Printf("Received ReportResult request:")

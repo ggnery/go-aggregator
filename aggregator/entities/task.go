@@ -27,6 +27,16 @@ type ModelRequirement struct {
 	// Add other fields as needed
 }
 
+type TaskAttemptStatus string
+
+const (
+	TaskAttemptStatusLeased    TaskAttemptStatus = "leased"
+	TaskAttemptStatusRunning   TaskAttemptStatus = "running"
+	TaskAttemptStatusSucceeded TaskAttemptStatus = "succeeded"
+	TaskAttemptStatusFailed    TaskAttemptStatus = "failed"
+	TaskAttemptStatusAborted   TaskAttemptStatus = "aborted"
+	TaskAttemptStatusExpired   TaskAttemptStatus = "expired"
+)
 
 type Task struct {
 	TaskID        uuid.UUID          `json:"task_id" db:"task_id"`
@@ -43,19 +53,6 @@ type Task struct {
 	DeadlineAt    sql.NullTime       `json:"deadline_at,omitempty" db:"deadline_at"` // nullable
 	Annotations   json.RawMessage    `json:"annotations" db:"annotations"`
 }
-
-//=========================================================================================================================
-
-type TaskAttemptStatus string
-
-const (
-	TaskAttemptStatusLeased    TaskAttemptStatus = "leased"
-	TaskAttemptStatusRunning   TaskAttemptStatus = "running"
-	TaskAttemptStatusSucceeded TaskAttemptStatus = "succeeded"
-	TaskAttemptStatusFailed    TaskAttemptStatus = "failed"
-	TaskAttemptStatusAborted   TaskAttemptStatus = "aborted"
-	TaskAttemptStatusExpired   TaskAttemptStatus = "expired"
-)
 
 type TaskAttempt struct {
 	AttemptID      int64             `json:"attempt_id" db:"attempt_id"`

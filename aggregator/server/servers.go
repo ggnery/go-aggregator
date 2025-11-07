@@ -1,11 +1,20 @@
-package controller
+package server
 
 import (
 	"context" // handle request contexts
 	"fmt"
 	"log"
+	"google.golang.org/grpc"
 	aggregatorpb "aggregator/api/proto/aggregator/v1"
 )
+
+func RegisterGRPCServers(grpcServer *grpc.Server) {
+	// Register our Aggregator service with the gRPC server
+	aggregatorpb.RegisterAggregatorServer(grpcServer, &AggregatorServer{})
+
+	//Register more services here ->
+}
+
 
 type AggregatorServer struct {
 	aggregatorpb.UnimplementedAggregatorServer
@@ -29,3 +38,5 @@ func (s *AggregatorServer) ReportResult(ctx context.Context, req *aggregatorpb.R
 		Message: fmt.Sprintf("Task %s result received successfully", req.TaskId),
 	}, nil
 }
+
+

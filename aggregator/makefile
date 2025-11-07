@@ -4,7 +4,7 @@ proto:
 	protoc --go_out=. --go-grpc_out=. ./api/proto/aggregator.proto;
 
 run-server:
-	go run cmd/server/main.go
+	go run main.go
 
 run-mock-node:
 	go run cmd/mock/node.go

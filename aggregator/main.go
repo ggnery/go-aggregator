@@ -4,7 +4,7 @@ import (
 	"log"
 	"net" // network operations
 	"google.golang.org/grpc"
-	"aggregator/internal/grpc_servers"
+	"aggregator/server"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 
 	// Create gRPC server
 	grpcServer := grpc.NewServer()
-	controller.RegisterGRPCServers(grpcServer)	
+	server.RegisterGRPCServers(grpcServer)	
 
 	log.Printf("gRPC server listening on %s", port)
 	if err := grpcServer.Serve(lis); err != nil {

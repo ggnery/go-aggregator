@@ -31,9 +31,9 @@ func main() {
 
 	// Prepare the ReportResult request
 	request := &aggregatorpb.ReportResultRequest{
-		TaskId:     "task-123e4567-e89b-12d3-a456-426614174000",
+		TaskId:     "123e4567-e89b-12d3-a456-426614174000",
 		AttemptId:  1,
-		LeaseToken: "token-abc123xyz",
+		LeaseToken: "23e45671-e89b-12d3-a456-426614174001",
 		Status:     "succeeded",
 		ResultRef:  "s3://results/output-task-123.txt",
 		Metrics:    `{"duration_ms": 8234, "tokens": 156, "memory_mb": 512}`,

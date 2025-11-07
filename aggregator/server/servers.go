@@ -1,11 +1,17 @@
 package server
 
 import (
-	"context" // handle request contexts
-	"fmt"
-	"log"
-	"google.golang.org/grpc"
+	"aggregator/entities"
+	"aggregator/services"
+
+	"context"
+	"database/sql"
+	"encoding/json"
+
 	aggregatorpb "aggregator/api/proto/aggregator/v1"
+	
+	"github.com/google/uuid"
+	"google.golang.org/grpc"
 )
 
 func RegisterGRPCServers(grpcServer *grpc.Server) {
@@ -22,21 +28,31 @@ type AggregatorServer struct {
 
 //Report Result server
 func (s *AggregatorServer) ReportResult(ctx context.Context, req *aggregatorpb.ReportResultRequest) (*aggregatorpb.ReportResultResponse, error) {
-	// Log the incoming request
-	log.Printf("Received ReportResult request:")
-	log.Printf("  Task ID: %s", req.TaskId)
-	log.Printf("  Attempt ID: %d", req.AttemptId)
-	log.Printf("  Status: %s", req.Status)
-	log.Printf("  Result Ref: %s", req.ResultRef)
-	log.Printf("  Metrics: %s", req.Metrics)
-	
-	// Process the request (add your business logic here)
+	taskID, err := uuid.Parse(req.TaskId)
+	if err != nil {
+		return nil, err
+	}
 
-	// Return a response
-	return &aggregatorpb.ReportResultResponse{
-		Acknowledged: true,
-		Message: fmt.Sprintf("Task %s result received successfully", req.TaskId),
-	}, nil
+	leaseToken, err := uuid.Parse(req.LeaseToken)
+	if err != nil {
+		return nil, err
+	}
+	
+	taskAttempt := entities.TaskAttempt{
+		AttemptID: req.AttemptId,
+		TaskID: taskID,
+		LeaseToken: leaseToken,
+		Status: entities.TaskAttemptStatus(req.Status),
+		ResultRef: sql.NullString{String: req.ResultRef},
+		Metrics: json.RawMessage(req.Metrics),
+	}
+
+	err = services.ReportResultService(taskAttempt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &aggregatorpb.ReportResultResponse{Acknowledged: true, Message: "200"}, nil
 }
 
 

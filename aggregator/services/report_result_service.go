@@ -6,11 +6,12 @@ import (
 )
 
 type ReportResultService struct {
-	taskRepository *repository.TaskRepository
+	taskRepository       *repository.TaskRepository
+	aggregatorRepository *repository.AggregatorRepository
 }
 
-func NewReportResultService(taskRepository *repository.TaskRepository) *ReportResultService {
-	return &ReportResultService{taskRepository: taskRepository}
+func NewReportResultService(taskRepository *repository.TaskRepository, aggregatorRepository *repository.AggregatorRepository) *ReportResultService {
+	return &ReportResultService{taskRepository: taskRepository, aggregatorRepository: aggregatorRepository}
 }
 
 func (s *ReportResultService) ReportResult(taskResult orm.TaskResult) error {
@@ -22,6 +23,11 @@ func (s *ReportResultService) ReportResult(taskResult orm.TaskResult) error {
 	}
 
 	err = s.taskRepository.UpdateTaskByTaskResult(taskResult)
+	if err != nil {
+		return err
+	}
+
+	err = s.aggregatorRepository.InsertAggregationPart(taskResult)
 	if err != nil {
 		return err
 	}

@@ -18,9 +18,10 @@ import (
 func RegisterGRPCServers(grpcServer *grpc.Server, db *sql.DB) {
 	// Register repositories here
 	taskRepository := repository.NewTaskRepository(db)
+	aggregatorRepository := repository.NewAggregatorRepository(db)
 	
 	// Register services here
-	reportResultService := services.NewReportResultService(taskRepository)
+	reportResultService := services.NewReportResultService(taskRepository, aggregatorRepository)
 
 	// Register gRPC servers here
 	aggregatorpb.RegisterAggregatorServer(grpcServer, &AggregatorServer{ReportResultService: reportResultService})

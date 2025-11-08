@@ -45,7 +45,7 @@ func main() {
 
 	// Create gRPC server
 	grpcServer := grpc.NewServer()
-	server.RegisterGRPCServers(grpcServer)
+	server.RegisterGRPCServers(grpcServer, db)
 
 	log.Printf("gRPC server listening on %s", serverPort)
 	if err := grpcServer.Serve(lis); err != nil {

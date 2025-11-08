@@ -1,8 +1,9 @@
 package server
 
 import (
-	"aggregator/entities"
 	"aggregator/services"
+	"aggregator/repository/orm"	
+	"aggregator/repository"
 
 	"context"
 	"database/sql"
@@ -14,18 +15,24 @@ import (
 	"google.golang.org/grpc"
 )
 
-func RegisterGRPCServers(grpcServer *grpc.Server) {
-	// Register our Aggregator service with the gRPC server
-	aggregatorpb.RegisterAggregatorServer(grpcServer, &AggregatorServer{})
+func RegisterGRPCServers(grpcServer *grpc.Server, db *sql.DB) {
+	// Register repositories here
+	taskRepository := repository.NewTaskRepository(db)
+	
+	// Register services here
+	reportResultService := services.NewReportResultService(taskRepository)
 
-	//Register more services here ->
+	// Register gRPC servers here
+	aggregatorpb.RegisterAggregatorServer(grpcServer, &AggregatorServer{ReportResultService: reportResultService})
+
 }
 
 type AggregatorServer struct {
 	aggregatorpb.UnimplementedAggregatorServer
+	ReportResultService *services.ReportResultService
 }
 
-//Report Result server
+//Report Result gRPC server
 func (s *AggregatorServer) ReportResult(ctx context.Context, req *aggregatorpb.ReportResultRequest) (*aggregatorpb.ReportResultResponse, error) {
 	taskID, err := uuid.Parse(req.TaskId)
 	if err != nil {
@@ -37,16 +44,16 @@ func (s *AggregatorServer) ReportResult(ctx context.Context, req *aggregatorpb.R
 		return nil, err
 	}
 	
-	taskAttempt := entities.TaskAttempt{
+	taskResult := orm.TaskResult{
 		AttemptID: req.AttemptId,
 		TaskID: taskID,
 		LeaseToken: leaseToken,
-		Status: entities.TaskAttemptStatus(req.Status),
-		ResultRef: sql.NullString{String: req.ResultRef},
+		Status: req.Status,
+		ResultRef: sql.NullString{String: req.ResultRef, Valid: true},
 		Metrics: json.RawMessage(req.Metrics),
 	}
 
-	err = services.ReportResultService(taskAttempt)
+	err = s.ReportResultService.ReportResult(taskResult)
 	if err != nil {
 		return nil, err
 	}

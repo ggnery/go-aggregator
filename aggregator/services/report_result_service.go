@@ -1,24 +1,25 @@
 package services
 
 import (
-	"aggregator/entities"
-	"encoding/json"
-	"fmt"
-	"log"
+	"aggregator/repository"
+	"aggregator/repository/orm"
 )
 
-func ReportResultService(taskAttempt entities.TaskAttempt) error {
+type ReportResultService struct {
+	taskRepository *repository.TaskRepository
+}
+
+func NewReportResultService(taskRepository *repository.TaskRepository) *ReportResultService {
+	return &ReportResultService{taskRepository: taskRepository}
+}
+
+func (s *ReportResultService) ReportResult(taskResult orm.TaskResult) error {
 	//TODO: Implement the report result service
 
-	// Pretty-print the TaskAttempt struct
-	prettyJSON, err := json.MarshalIndent(taskAttempt, "", "  ")
+	err := s.taskRepository.UpdateTaskAttemptbyTaskResult(taskResult)
 	if err != nil {
-		log.Printf("Error marshaling TaskAttempt: %v", err)
 		return err
 	}
-
-	fmt.Println("ReportResultService received TaskAttempt:")
-	fmt.Println(string(prettyJSON))
 
 	return nil
 }

@@ -30,13 +30,16 @@ func main() {
 	defer cancel()
 
 	// Prepare the ReportResult request
+	// Using data from seed file V2__seed_data.sql - simulating completion of the running task
+	// Task: 80000000-0000-0000-0000-000000000012 (part of Job 2, batch inference)
+	// Attempt: 5 (currently leased and running in seed data)
 	request := &aggregatorpb.ReportResultRequest{
-		TaskId:     "123e4567-e89b-12d3-a456-426614174000",
-		AttemptId:  1,
-		LeaseToken: "23e45671-e89b-12d3-a456-426614174001",
+		TaskId:     "80000000-0000-0000-0000-000000000012",
+		AttemptId:  5,
+		LeaseToken: "90000000-0000-0000-0000-000000000012",
 		Status:     "succeeded",
-		ResultRef:  "s3://results/output-task-123.txt",
-		Metrics:    `{"duration_ms": 8234, "tokens": 156, "memory_mb": 512}`,
+		ResultRef:  "s3://results/task-80000000-0000-0000-0000-000000000012.json",
+		Metrics:    `{"duration_ms": 450000, "tokens_generated": 95, "batch_size": 10, "memory_mb": 2048}`,
 	}
 
 	log.Println("Calling ReportResult RPC...")

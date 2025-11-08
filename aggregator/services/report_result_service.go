@@ -21,5 +21,10 @@ func (s *ReportResultService) ReportResult(taskResult orm.TaskResult) error {
 		return err
 	}
 
+	err = s.taskRepository.UpdateTaskByTaskResult(taskResult)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

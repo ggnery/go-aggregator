@@ -21,7 +21,6 @@ func RegisterGRPCServers(grpcServer *grpc.Server) {
 	//Register more services here ->
 }
 
-
 type AggregatorServer struct {
 	aggregatorpb.UnimplementedAggregatorServer
 }

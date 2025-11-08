@@ -1,0 +1,35 @@
+services:
+
+  db:
+    image: postgres
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: orchestrator
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flyway:
+    image: flyway/flyway
+
+    command: -configFiles=/flyway/conf/flyway.conf -locations=filesystem:/flyway/sql migrate
+    volumes:
+      - ./migrations:/flyway/sql
+      - ./flyway.conf:/flyway/conf/flyway.conf
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

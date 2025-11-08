@@ -16,7 +16,7 @@ func NewAggregatorRepository(db *sql.DB) *AggregatorRepository {
 	return &AggregatorRepository{db: db}
 }
 
-func (r *AggregatorRepository) InsertAggregationPartbyReportResult(reportResult orm.ReportResult) error {
+func (r *AggregatorRepository) InsertAggregationPartByReportResult(reportResult orm.ReportResult) error {
 	// Get the job_id from the task
 	var jobID uuid.UUID
 	err := r.db.QueryRow(`
@@ -54,8 +54,7 @@ func (r *AggregatorRepository) InsertAggregationPartbyReportResult(reportResult 
 	}
 	defer tx.Rollback()
 
-	// Insert aggregation_part with deduplication
-	_, err = tx.Exec(`
+	query := `
 		INSERT INTO orchestrator.aggregation_part (
 			job_id, 
 			part_key, 
@@ -66,10 +65,35 @@ func (r *AggregatorRepository) InsertAggregationPartbyReportResult(reportResult 
 		)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		ON CONFLICT (job_id, part_key) DO NOTHING
-	`, jobID, partKey, reportResult.TaskID, reportResult.AttemptID, payloadRef, mergeState)
+	`
+	// Insert aggregation_part with deduplication
+	_, err = tx.Exec(query, jobID, partKey, reportResult.TaskID, reportResult.AttemptID, payloadRef, mergeState)
 	if err != nil {
 		return err
 	}
 
 	return tx.Commit()
+}
+
+func (r *AggregatorRepository) UpdateAggregationByReportResult(reportResult orm.ReportResult) error {
+    // Only increment if succeeded
+    if reportResult.Status != "succeeded" {
+        return nil
+    }
+
+    var jobID uuid.UUID
+    err := r.db.QueryRow(`
+        SELECT parent_job FROM orchestrator.task WHERE task_id = $1
+    `, reportResult.TaskID).Scan(&jobID)
+    if err != nil {
+        return err
+    }
+
+    _, err = r.db.Exec(`
+        UPDATE orchestrator.aggregation
+        SET received_parts = received_parts + 1,
+            last_part_merged_at = now()
+        WHERE job_id = $1
+    `, jobID)
+    return err
 }

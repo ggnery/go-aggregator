@@ -14,20 +14,18 @@ func NewReportResultService(taskRepository *repository.TaskRepository, aggregato
 	return &ReportResultService{taskRepository: taskRepository, aggregatorRepository: aggregatorRepository}
 }
 
-func (s *ReportResultService) ReportResult(taskResult orm.TaskResult) error {
-	//TODO: Implement the report result service
-
-	err := s.taskRepository.UpdateTaskAttemptbyTaskResult(taskResult)
+func (s *ReportResultService) ReportResult(reportResult orm.ReportResult) error {
+	err := s.taskRepository.UpdateTaskAttemptbyReportResult(reportResult)
 	if err != nil {
 		return err
 	}
 
-	err = s.taskRepository.UpdateTaskByTaskResult(taskResult)
+	err = s.taskRepository.UpdateTaskByReportResult(reportResult)
 	if err != nil {
 		return err
 	}
 
-	err = s.aggregatorRepository.InsertAggregationPart(taskResult)
+	err = s.aggregatorRepository.InsertAggregationPartbyReportResult(reportResult)
 	if err != nil {
 		return err
 	}

@@ -13,7 +13,7 @@ func NewTaskRepository(db *sql.DB) *TaskRepository {
 	return &TaskRepository{db: db}
 }
 
-func (r *TaskRepository) UpdateTaskAttemptbyTaskResult(taskResult orm.TaskResult) error {
+func (r *TaskRepository) UpdateTaskAttemptbyReportResult(reportResult orm.ReportResult) error {
 	query := `
 		UPDATE orchestrator.task_attempt
 		SET status = $1,
@@ -27,12 +27,12 @@ func (r *TaskRepository) UpdateTaskAttemptbyTaskResult(taskResult orm.TaskResult
 
 	_, err := r.db.Exec(
 		query,
-		taskResult.Status,
-		taskResult.ResultRef,
-		taskResult.Metrics,
-		taskResult.AttemptID,
-		taskResult.TaskID,
-		taskResult.LeaseToken,
+		reportResult.Status,
+		reportResult.ResultRef,
+		reportResult.Metrics,
+		reportResult.AttemptID,
+		reportResult.TaskID,
+		reportResult.LeaseToken,
 	)
 	if err != nil {
 		return err
@@ -41,9 +41,7 @@ func (r *TaskRepository) UpdateTaskAttemptbyTaskResult(taskResult orm.TaskResult
 	return nil
 }
 
-func (r *TaskRepository) UpdateTaskByTaskResult(taskResult orm.TaskResult) error {
-	// Note: attempts_made is NOT incremented here - it's incremented when the lease is created by the Scheduler
-	// This function only updates the task status based on the attempt result
+func (r *TaskRepository) UpdateTaskByReportResult(reportResult orm.ReportResult) error {
 	query := `
 		UPDATE orchestrator.task
 		SET status = CASE 
@@ -73,8 +71,8 @@ func (r *TaskRepository) UpdateTaskByTaskResult(taskResult orm.TaskResult) error
 
 	_, err := r.db.Exec(
 		query,
-		taskResult.Status,
-		taskResult.TaskID,
+		reportResult.Status,
+		reportResult.TaskID,
 	)
 	if err != nil {
 		return err

@@ -16,12 +16,12 @@ func NewAggregatorRepository(db *sql.DB) *AggregatorRepository {
 	return &AggregatorRepository{db: db}
 }
 
-func (r *AggregatorRepository) InsertAggregationPart(taskResult orm.TaskResult) error {
+func (r *AggregatorRepository) InsertAggregationPartbyReportResult(reportResult orm.ReportResult) error {
 	// Get the job_id from the task
 	var jobID uuid.UUID
 	err := r.db.QueryRow(`
 		SELECT parent_job FROM orchestrator.task WHERE task_id = $1
-	`, taskResult.TaskID).Scan(&jobID)
+	`, reportResult.TaskID).Scan(&jobID)
 	if err != nil {
 		return err
 	}
@@ -29,12 +29,12 @@ func (r *AggregatorRepository) InsertAggregationPart(taskResult orm.TaskResult) 
 	// Construct part_key as a stable dedupe key
 	// Format: task_id::attempt_id
 	// TODO: include partition_index, chunk_id, checksum
-	partKey := taskResult.TaskID.String() + "::" + strconv.FormatInt(taskResult.AttemptID, 10)
+	partKey := reportResult.TaskID.String() + "::" + strconv.FormatInt(reportResult.AttemptID, 10)
 
 	// Get payload_ref from ResultRef
 	payloadRef := ""
-	if taskResult.ResultRef.Valid {
-		payloadRef = taskResult.ResultRef.String
+	if reportResult.ResultRef.Valid {
+		payloadRef = reportResult.ResultRef.String
 	}
 
 	// Determine merge_state based on task attempt status
@@ -43,7 +43,7 @@ func (r *AggregatorRepository) InsertAggregationPart(taskResult orm.TaskResult) 
 	// - 'skipped': duplicate delivery (handled by ON CONFLICT)
 	// - 'merged': set later by merge service after successful merge
 	mergeState := "pending"
-	if taskResult.Status == "failed" || taskResult.Status == "aborted" || taskResult.Status == "expired" {
+	if reportResult.Status == "failed" || reportResult.Status == "aborted" || reportResult.Status == "expired" {
 		mergeState = "corrupt"
 	}
 
@@ -66,7 +66,7 @@ func (r *AggregatorRepository) InsertAggregationPart(taskResult orm.TaskResult) 
 		)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		ON CONFLICT (job_id, part_key) DO NOTHING
-	`, jobID, partKey, taskResult.TaskID, taskResult.AttemptID, payloadRef, mergeState)
+	`, jobID, partKey, reportResult.TaskID, reportResult.AttemptID, payloadRef, mergeState)
 	if err != nil {
 		return err
 	}
